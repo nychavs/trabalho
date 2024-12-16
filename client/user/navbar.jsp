@@ -5,14 +5,6 @@
         <ul class="navbar-menu">
             <li><a href="home.jsp" class="navbar-link">Home</a></li>
             <li><a href="historico.jsp" class="navbar-link">Histórico</a></li>
-            
-            <% 
-                String role = (String) session.getAttribute("role");
-                if (role != null && role.equals("admin")) {
-            %>
-                <li><a href="espacos.jsp" class="navbar-link">Espaços</a></li>
-                <li><a href="agendamentos.jsp" class="navbar-link">Agendamentos</a></li>
-            <% } %>
         </ul>
     </div>
 </nav>
