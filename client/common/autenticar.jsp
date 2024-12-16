@@ -1,63 +1,62 @@
 <%@ page import="java.sql.*" %>
+<%@ page import="javax.servlet.http.*" %>
+<%@ page import="javax.servlet.*" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page session="true" %>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autenticação</title>
-</head>
-<body>
-
 <%
-    String usuario = request.getParameter("usuario");
+    // Obtendo os dados do formulário
+    String email = request.getParameter("usuario"); // Alterado para receber o email
     String senha = request.getParameter("senha");
-    boolean autenticado = false;
-    boolean isAdmin = false;
-    int clienteId = -1;
-    String nomeUsuario = "";
+
+    // Validação básica
+    if (email == null || senha == null || email.isEmpty() || senha.isEmpty()) {
+        response.sendRedirect("login.jsp?erro=preenchimento");
+        return;
+    }
+
+    // Conexão com o banco de dados
+    Connection conexao = null;
+    PreparedStatement statement = null;
+    ResultSet resultSet = null;
 
     try {
         Class.forName("com.mysql.jdbc.Driver");
-        Connection conexao = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/espacos","root","");
-        PreparedStatement statement = conexao.prepareStatement("SELECT * FROM users WHERE email = ? AND senha = ?");
-        statement.setString(1, usuario);
+        conexao = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/espacos","root","");
+        
+        String sql = "SELECT id, role, first_login FROM users WHERE email = ? AND senha = ?";
+        statement = conexao.prepareStatement(sql);
+        statement.setString(1, email);
         statement.setString(2, senha);
-        ResultSet result = statement.executeQuery();
 
-        if (result.next()) {
-            autenticado = true;
-            clienteId = result.getInt("id");
-            nomeUsuario = result.getString("nome");
-            isAdmin = result.getString("role").equals("admin");
-        }
-        result.close();
-        statement.close();
-        conexao.close();
-    } catch (SQLException e) {
-        out.println("Erro na conexão ao banco de dados. erro = " + e);
-    }
+        resultSet = statement.executeQuery();
 
-    if (autenticado) {
-        session.setAttribute("cliente_id", clienteId);
-        session.setAttribute("nome_usuario", nomeUsuario);
-        session.setAttribute("is_admin", isAdmin);
-        if (isAdmin) {
-            response.sendRedirect("/trabalho/client/admin/listaEspacos.jsp");
+        if (resultSet.next()) {
+            int userId = resultSet.getInt("id");
+            String role = resultSet.getString("role");
+            boolean firstLogin = resultSet.getBoolean("first_login");
+
+            session.setAttribute("user_id", userId);
+            session.setAttribute("role", role);
+
+            if (firstLogin && email.equals("admin@example.com")) {
+                response.sendRedirect("/trabalho/client/admin/alterarSenha.jsp");
+            } else if (role.equals("admin")) {
+                response.sendRedirect("/trabalho/client/admin/listaEspacos.jsp");
+            } else {
+                response.sendRedirect("/trabalho/client/user/home.jsp");
+            }
         } else {
-            response.sendRedirect("home.jsp");
+            response.sendRedirect("login.jsp?erro=invalid");
         }
-    } else {
-        out.println("<div class='container my-5'>");
-        out.println("<h1 class='text-center'>Erro na Autenticação</h1>");
-        out.println("<p class='text-center'>Usuário ou senha incorretos. Tente novamente.</p>");
-        out.println("<div class='text-center'>");
-        out.println("<a href='login.jsp' class='btn btn-primary'>Voltar ao Login</a>");
-        out.println("</div>");
-        out.println("</div>");
+    } catch (Exception e) {
+        out.println("Erro ao autenticar o usuário: " + e.getMessage());
+    } finally {
+        try {
+            if (resultSet != null) resultSet.close();
+            if (statement != null) statement.close();
+            if (conexao != null) conexao.close();
+        } catch (SQLException e) {
+            out.println("Erro ao fechar a conexão: " + e.getMessage());
+        }
     }
 %>
-
-</body>
-</html>

@@ -1,6 +1,8 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="navbar.jsp" %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,8 +36,8 @@
     String descricao = "";
     String fotos = "";
     double avaliacao_geral = 0.0;
-    int capacidade = 50; // Exemplo de capacidade, pode ser ajustado conforme necessário
-    double preco = 500.00; // Exemplo de preço, pode ser ajustado conforme necessário
+    int capacidade = 50; 
+    double preco = 500.00; 
 
     try {
         Class.forName("com.mysql.jdbc.Driver");
@@ -61,12 +63,9 @@
 %>
 
 <div class="container my-5">
-    <!-- Título -->
     <h1 class="mb-4">Detalhes do Local</h1>
 
-    <!-- Layout Principal -->
     <div class="row">
-        <!-- Galeria de Imagens -->
         <div class="col-lg-8">
             <div class="row g-3 image-gallery">
                 <%
@@ -84,7 +83,6 @@
             </div>
         </div>
 
-        <!-- Informações e Botão Reservar -->
         <div class="col-lg-4">
             <div class="bg-white p-3 rounded shadow">
                 <h5 class="fw-bold"><%= nome %></h5>
@@ -99,14 +97,17 @@
                 </p>
                 <form action="reservar.jsp" method="post">
                     <input type="hidden" name="idLocal" value="<%= idLocal %>">
-                    <button type="submit" class="btn btn-reservar w-100">Reservar</button>
+                    <label for="data_entrada">Data de Entrada:</label>
+                    <input type="date" id="data_entrada" name="data_entrada" class="form-control" required>
+                    <label for="data_saida">Data de Saída:</label>
+                    <input type="date" id="data_saida" name="data_saida" class="form-control" required>
+                    <button type="submit" class="btn btn-reservar w-100 mt-3">Reservar</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Link para Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

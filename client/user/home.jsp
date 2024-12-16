@@ -1,12 +1,13 @@
 <%@ page import="java.sql.*" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="navbar.jsp" %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seleção de Salas</title>
-    <!-- Link para Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .card-container {
@@ -19,6 +20,16 @@
         .card-text {
             font-size: 0.875rem;
         }
+        .filter-form label {
+            font-weight: bold;
+        }
+        .filter-form .form-control {
+            margin-bottom: 10px;
+        }
+        .d-flex-align-center {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -29,23 +40,28 @@
 
     <!-- Barra de Filtro -->
     <div class="row mb-4">
-        <div class="col-md-6">
-            <form method="get" action="home.jsp">
-                <input type="text" name="filtroNome" class="form-control" placeholder="Pesquisar por nome do local" value="<%= request.getParameter("filtroNome") != null ? request.getParameter("filtroNome") : "" %>">
-                <div class="row mt-2">
-                    <div class="col-md-6">
-                        <input type="date" name="dataInicio" class="form-control" value="<%= request.getParameter("dataInicio") != null ? request.getParameter("dataInicio") : "" %>">
+        <div class="col-12">
+            <form method="get" action="home.jsp" class="filter-form">
+                <div class="d-flex flex-wrap justify-content-start">
+                    <div class="mb-2 me-3 d-flex-align-center">
+                        <label for="filtroNome">Pesquisar por nome</label>
+                        <input type="text" id="filtroNome" name="filtroNome" class="form-control" placeholder="Nome do local" value="<%= request.getParameter("filtroNome") != null ? request.getParameter("filtroNome") : "" %>">
                     </div>
-                    <div class="col-md-6">
-                        <input type="date" name="dataFim" class="form-control" value="<%= request.getParameter("dataFim") != null ? request.getParameter("dataFim") : "" %>">
+                    <div class="mb-2 me-3 d-flex-align-center">
+                        <label for="dataInicio">Data de Entrada</label>
+                        <input type="date" id="dataInicio" name="dataInicio" class="form-control" value="<%= request.getParameter("dataInicio") != null ? request.getParameter("dataInicio") : "" %>">
+                    </div>
+                    <div class="mb-2 me-3 d-flex-align-center">
+                        <label for="dataFim">Data de Saída</label>
+                        <input type="date" id="dataFim" name="dataFim" class="form-control" value="<%= request.getParameter("dataFim") != null ? request.getParameter("dataFim") : "" %>">
+                    </div>
+                    <div class="mb-2 d-flex-align-center">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary mt-2">Filtrar</button>
             </form>
         </div>
     </div>
-
-    <!-- Grid de Salas e Auditórios -->
     <div class="row g-4">
         <%
           try {
@@ -118,7 +134,7 @@
     </div>
 </div>
 
-<!-- Link para Bootstrap JS -->
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

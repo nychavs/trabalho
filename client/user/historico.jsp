@@ -1,4 +1,9 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*" %>
+<%@ page import="java.util.*" %>
+<%@ page import="java.sql.Date" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ page session="true" %>
+<%@ include file="navbar.jsp" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,45 +26,93 @@
 <body class="bg-light">
 
 <div class="container my-5">
-    <!-- Título -->
     <h1 class="mb-4 text-center">Histórico de Agendamentos</h1>
 
-    <!-- Filtro -->
     <div class="row mb-4">
-        <div class="col-md-6">
-            <input type="text" class="form-control" placeholder="Pesquisar por nome do local">
-        </div>
-        <div class="col-md-3">
-            <input type="date" class="form-control">
-        </div>
-        <div class="col-md-3">
-            <input type="date" class="form-control">
-        </div>
+        <form method="get" action="historico.jsp" class="d-flex flex-column flex-md-row gap-3">
+            <input type="text" name="filtroNome" class="form-control" placeholder="Pesquisar por nome do local" value="<%= request.getParameter("filtroNome") != null ? request.getParameter("filtroNome") : "" %>">
+            <input type="date" name="dataInicio" class="form-control" value="<%= request.getParameter("dataInicio") != null ? request.getParameter("dataInicio") : "" %>">
+            <input type="date" name="dataFim" class="form-control" value="<%= request.getParameter("dataFim") != null ? request.getParameter("dataFim") : "" %>">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+        </form>
     </div>
 
-    <!-- Lista de Agendamentos -->
     <div class="row g-3">
-        <!-- Card de Agendamento 1 -->
+        <% 
+            int clienteId = (Integer) session.getAttribute("user_id");
+            String filtroNome = request.getParameter("filtroNome");
+            String dataInicio = request.getParameter("dataInicio");
+            String dataFim = request.getParameter("dataFim");
+
+            try {
+                String sql = "SELECT agendamentos.id, locais.nome AS nome_local, agendamentos.data_entrada, agendamentos.data_saida, agendamentos.hora, agendamentos.status " +
+                             "FROM agendamentos " +
+                             "JOIN locais ON agendamentos.espaco_id = locais.id " +
+                             "WHERE agendamentos.cliente_id = ?";
+
+                if (filtroNome != null && !filtroNome.isEmpty()) {
+                    sql += " AND locais.nome LIKE ?";
+                }
+                if (dataInicio != null && !dataInicio.isEmpty()) {
+                    sql += " AND agendamentos.data_entrada >= ?";
+                }
+                if (dataFim != null && !dataFim.isEmpty()) {
+                    sql += " AND agendamentos.data_saida <= ?";
+                }
+                Class.forName("com.mysql.jdbc.Driver");
+                Connection conexao = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/espacos","root","");
+                PreparedStatement statement = conexao.prepareStatement(sql);
+                statement.setInt(1, clienteId);
+
+                int paramIndex = 2;
+                if (filtroNome != null && !filtroNome.isEmpty()) {
+                    statement.setString(paramIndex++, "%" + filtroNome + "%");
+                }
+                if (dataInicio != null && !dataInicio.isEmpty()) {
+                    statement.setDate(paramIndex++, Date.valueOf(dataInicio));
+                }
+                if (dataFim != null && !dataFim.isEmpty()) {
+                    statement.setDate(paramIndex++, Date.valueOf(dataFim));
+                }
+
+                ResultSet resultSet = statement.executeQuery();
+                while (resultSet.next()) {
+                    int id = resultSet.getInt("id");
+                    String nomeLocal = resultSet.getString("nome_local");
+                    java.sql.Date dataEntrada = resultSet.getDate("data_entrada");
+                    java.sql.Date dataSaida = resultSet.getDate("data_saida");
+                    String status = resultSet.getString("status");
+        %>
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Local: Sala de Reunião</h5>
+                    <h5 class="card-title">Local: <%= nomeLocal %></h5>
                     <p class="card-text">
-                        Data: 2024-12-20<br>
-                        Status: 
+                        Data de Entrada: <%= dataEntrada %><br>
+                        Data de Saída: <%= dataSaida %><br>
+                        Status: <%= status %>
                     </p>
-                    <!-- Botão Cancelar -->
-                    <form action="cancelarAgendamento" method="post">
-                        <input type="hidden" name="idAgendamento" value="1">
-                        <button class="btn btn-cancelar w-100">Cancelar</button>
-                    </form>
+                    <% if (status.equals("aprovacao pendente")) { %> 
+                        <form action="cancelarAgendamento.jsp" method="post">
+                            <input type="hidden" name="idAgendamento" value="<%= id %>">
+                            <button class="btn btn-cancelar w-100">Cancelar</button>
+                        </form>
+                     <% } %>
                 </div>
             </div>
-        </div>        
+        </div>
+        <% 
+                }
+                resultSet.close();
+                statement.close();
+                conexao.close();
+            } catch (SQLException e) {
+                out.println("Erro na conexão ao banco de dados. erro = " + e);
+            }
+        %>
     </div>
 </div>
 
-<!-- Link para Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

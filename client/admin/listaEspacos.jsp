@@ -1,13 +1,13 @@
 <%@ page import="java.sql.*" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page session="true" %>
+<%@ include file="navbar.jsp" %>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Listagem de Locais</title>
-  <!-- Link para Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .btn-edit {
@@ -26,7 +26,6 @@
 <body class="bg-light">
 
   <div class="container my-5">
-    <!-- Barra Superior -->
     <div class="row mb-4">
       <div class="col-md-12">
         <h1 class="fw-bold">Lista de Locais</h1>
@@ -45,7 +44,6 @@
       </div>
     </div>
 
-    <!-- Grid de Locais -->
     <div class="row g-4">
       <%
         try {
@@ -58,7 +56,7 @@
         <!-- Card de Local -->
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
           <div class="card shadow-sm card-container">
-            <a href="cadastro-local.jsp?id=<%= listar.getInt("id") %>" class="btn btn-primary btn-edit">Editar</a>
+            <a href="cadastroEspaco.jsp?id=<%= listar.getInt("id") %>" class="btn btn-primary btn-edit">Editar</a>
             <div class="card-body">
               <h5 class="card-title"><%= listar.getString("nome") %></h5>
               <p class="card-text text-muted">
@@ -81,7 +79,6 @@
     </div>
   </div>
 
-  <!-- Link para Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
